@@ -27,7 +27,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "serve": "vite --host",
+    "host": "vite --host",
     "preview": "vite preview",
     "build": "tsc && vite build",
     "lint": "npx eslint . --ext .ts,.tsx",
