@@ -10,24 +10,7 @@ export default defineConfig({
         rollupOptions: {
             output: {
                 manualChunks: (id) => {
-                    if (
-                        id.includes("@babylonjs/core/Loading") ||
-                        id.includes("@babylonjs/loaders")
-                    ) {
-                        return "BabylonLoaders";
-                    } else if (
-                        id.includes("@babylonjs/core/scene") ||
-                        id.includes("@babylonjs/core/Misc") ||
-                        id.includes("@babylonjs/core/Maths")
-                    ) {
-                        return "BabylonSceneMiscMaths";
-                    } else if (id.includes("@babylonjs/core/Engines")) {
-                        return "BabylonEngines";
-                    } else if (id.includes("@babylonjs/core/Materials")) {
-                        return "BabylonMaterials";
-                    } else if (id.includes("@babylonjs/core/Meshes")) {
-                        return "BabylonMeshes";
-                    } else if (id.includes("@babylonjs")) {
+                    if (id.includes("@babylonjs/core")) {
                         return "BabylonCore";
                     } else if (id.includes("ammojs-typed")) {
                         return "AmmoJS";
