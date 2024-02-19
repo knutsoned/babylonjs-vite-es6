@@ -20,7 +20,6 @@ import { Texture } from "@babylonjs/core/Materials/Textures/texture";
 import { Effect } from "@babylonjs/core/Materials/effect";
 import { ShaderMaterial } from "@babylonjs/core/Materials/shaderMaterial";
 
-import grassTextureUrl from "../../assets/grass.jpg";
 import { DirectionalLight } from "@babylonjs/core/Lights/directionalLight";
 import { ShadowGenerator } from "@babylonjs/core/Lights/Shadows/shadowGenerator";
 
@@ -100,7 +99,10 @@ export class FresnelShaderScene implements CreateSceneClass {
 
         // Load a texture to be used as the ground material
         const groundMaterial = new StandardMaterial("ground material", scene);
-        groundMaterial.diffuseTexture = new Texture(grassTextureUrl, scene);
+        groundMaterial.diffuseTexture = new Texture(
+            "./assets/grass/jpg",
+            scene
+        );
 
         ground.material = groundMaterial;
         ground.receiveShadows = true;

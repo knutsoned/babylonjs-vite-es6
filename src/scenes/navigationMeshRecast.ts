@@ -21,19 +21,22 @@ import "@babylonjs/core/Culling/ray";
 
 // import * as GUI from "@babylonjs/gui";
 
-const agents: { idx: number, trf: TransformNode, mesh: Mesh, target: Mesh }[] = [];
+const agents: { idx: number; trf: TransformNode; mesh: Mesh; target: Mesh }[] =
+    [];
 
+// Ed. note: works in dev with warning, error in prod
 export class NavigationMeshRecast implements CreateSceneClass {
     createScene = async (
         engine: Engine,
         canvas: HTMLCanvasElement
     ): Promise<Scene> => {
         // Casting to any will not be required in future versions of the recast plugin
-        const recast = await Recast()
+        const recast = await Recast();
         // This creates a basic Babylon Scene object (non-mesh)
         const scene = new Scene(engine);
         const navigationPlugin = new RecastJSPlugin(recast);
-        navigationPlugin.setWorkerURL("./navMeshWorker.js");
+        // Ed. note: this should be able to be ./navmeshWorker.js or /navmeshWorker.js
+        navigationPlugin.setWorkerURL("/public/navMeshWorker.js");
 
         // This creates and positions a free camera (non-mesh)
         const camera = new FreeCamera("camera1", new Vector3(-6, 4, -8), scene);
@@ -43,7 +46,11 @@ export class NavigationMeshRecast implements CreateSceneClass {
         camera.attachControl(canvas, true);
 
         // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
-        const light = new HemisphericLight("light1", new Vector3(0, 1, 0), scene);
+        const light = new HemisphericLight(
+            "light1",
+            new Vector3(0, 1, 0),
+            scene
+        );
         // Default intensity is 1. Let's dim the light a small amount
         light.intensity = 0.7;
 
@@ -55,7 +62,7 @@ export class NavigationMeshRecast implements CreateSceneClass {
             walkableHeight: 1.0,
             walkableClimb: 1,
             walkableRadius: 1,
-            maxEdgeLen: 12.,
+            maxEdgeLen: 12,
             maxSimplificationError: 1.3,
             minRegionArea: 8,
             mergeRegionArea: 20,
@@ -64,116 +71,175 @@ export class NavigationMeshRecast implements CreateSceneClass {
             detailSampleMaxError: 1,
         };
 
-        navigationPlugin.createNavMesh([staticMesh], navmeshParameters, (navmeshData) => {
-            console.log("got worker data", navmeshData);
-            navigationPlugin.buildFromNavmeshData(navmeshData);
-            const navmeshdebug = navigationPlugin.createDebugNavMesh(scene);
-            navmeshdebug.position = new Vector3(0, 0.01, 0);
+        navigationPlugin.createNavMesh(
+            [staticMesh],
+            navmeshParameters,
+            (navmeshData) => {
+                console.log("got worker data", navmeshData);
+                navigationPlugin.buildFromNavmeshData(navmeshData);
+                const navmeshdebug = navigationPlugin.createDebugNavMesh(scene);
+                navmeshdebug.position = new Vector3(0, 0.01, 0);
 
-            const matdebug = new StandardMaterial('matdebug', scene);
-            matdebug.diffuseColor = new Color3(0.1, 0.2, 1);
-            matdebug.alpha = 0.2;
-            navmeshdebug.material = matdebug;
+                const matdebug = new StandardMaterial("matdebug", scene);
+                matdebug.diffuseColor = new Color3(0.1, 0.2, 1);
+                matdebug.alpha = 0.2;
+                navmeshdebug.material = matdebug;
 
-            // crowd
-            const crowd = navigationPlugin.createCrowd(10, 0.1, scene);
-            let i;
-            const agentParams = {
-                radius: 0.1,
-                height: 0.2,
-                maxAcceleration: 4.0,
-                maxSpeed: 1.0,
-                collisionQueryRange: 0.5,
-                pathOptimizationRange: 0.0,
-                separationWeight: 1.0
-            };
+                // crowd
+                const crowd = navigationPlugin.createCrowd(10, 0.1, scene);
+                let i;
+                const agentParams = {
+                    radius: 0.1,
+                    height: 0.2,
+                    maxAcceleration: 4.0,
+                    maxSpeed: 1.0,
+                    collisionQueryRange: 0.5,
+                    pathOptimizationRange: 0.0,
+                    separationWeight: 1.0,
+                };
 
-            for (i = 0; i < 1; i++) {
-                const width = 0.20;
-                const agentCube = MeshBuilder.CreateBox("cube", { size: width, height: width }, scene);
-                const targetCube = MeshBuilder.CreateBox("cube", { size: 0.1, height: 0.1 }, scene);
-                const matAgent = new StandardMaterial('mat2', scene);
-                const variation = Math.random();
-                matAgent.diffuseColor = new Color3(0.4 + variation * 0.6, 0.3, 1.0 - variation * 0.3);
-                agentCube.material = matAgent;
-                const randomPos = navigationPlugin.getRandomPointAround(new Vector3(-2.0, 0.1, -1.8), 0.5);
-                const transform = new TransformNode("transform");
-                //agentCube.parent = transform;
-                const agentIndex = crowd.addAgent(randomPos, agentParams, transform);
-                agents.push({ idx: agentIndex, trf: transform, mesh: agentCube, target: targetCube });
-            }
-
-            let startingPoint: Vector3 | null;
-            let currentMesh: AbstractMesh;
-            let pathLine: LinesMesh;
-            const getGroundPosition = function () {
-                const pickinfo = scene.pick(scene.pointerX, scene.pointerY);
-                if (pickinfo?.hit) {
-                    return pickinfo.pickedPoint;
+                for (i = 0; i < 1; i++) {
+                    const width = 0.2;
+                    const agentCube = MeshBuilder.CreateBox(
+                        "cube",
+                        { size: width, height: width },
+                        scene
+                    );
+                    const targetCube = MeshBuilder.CreateBox(
+                        "cube",
+                        { size: 0.1, height: 0.1 },
+                        scene
+                    );
+                    const matAgent = new StandardMaterial("mat2", scene);
+                    const variation = Math.random();
+                    matAgent.diffuseColor = new Color3(
+                        0.4 + variation * 0.6,
+                        0.3,
+                        1.0 - variation * 0.3
+                    );
+                    agentCube.material = matAgent;
+                    const randomPos = navigationPlugin.getRandomPointAround(
+                        new Vector3(-2.0, 0.1, -1.8),
+                        0.5
+                    );
+                    const transform = new TransformNode("transform");
+                    //agentCube.parent = transform;
+                    const agentIndex = crowd.addAgent(
+                        randomPos,
+                        agentParams,
+                        transform
+                    );
+                    agents.push({
+                        idx: agentIndex,
+                        trf: transform,
+                        mesh: agentCube,
+                        target: targetCube,
+                    });
                 }
 
-                return null;
-            }
-
-            const pointerDown = function (mesh: AbstractMesh) {
-                currentMesh = mesh;
-                startingPoint = getGroundPosition();
-                if (startingPoint) { // we need to disconnect camera from canvas
-                    setTimeout(function () {
-                        camera.detachControl();
-                    }, 0);
-                    const agents = crowd.getAgents();
-                    let i;
-                    for (i = 0; i < agents.length; i++) {
-                        crowd.agentGoto(agents[i], navigationPlugin.getClosestPoint(startingPoint));
+                let startingPoint: Vector3 | null;
+                let currentMesh: AbstractMesh;
+                let pathLine: LinesMesh;
+                const getGroundPosition = function () {
+                    const pickinfo = scene.pick(scene.pointerX, scene.pointerY);
+                    if (pickinfo?.hit) {
+                        return pickinfo.pickedPoint;
                     }
-                    const pathPoints = navigationPlugin.computePath(crowd.getAgentPosition(agents[0]), navigationPlugin.getClosestPoint(startingPoint));
-                    pathLine = MeshBuilder.CreateDashedLines("ribbon", { points: pathPoints, updatable: true, instance: pathLine }, scene);
-                }
-            }
 
-            scene.onPointerObservable.add((pointerInfo) => {
-                switch (pointerInfo.type) {
-                    case PointerEventTypes.POINTERDOWN:
-                        if (pointerInfo?.pickInfo?.pickedMesh) {
-                            console.log("pointer down", pointerInfo.pickInfo.pickedMesh.name);
-                            pointerDown(pointerInfo.pickInfo.pickedMesh)
+                    return null;
+                };
+
+                const pointerDown = function (mesh: AbstractMesh) {
+                    currentMesh = mesh;
+                    startingPoint = getGroundPosition();
+                    if (startingPoint) {
+                        // we need to disconnect camera from canvas
+                        setTimeout(function () {
+                            camera.detachControl();
+                        }, 0);
+                        const agents = crowd.getAgents();
+                        let i;
+                        for (i = 0; i < agents.length; i++) {
+                            crowd.agentGoto(
+                                agents[i],
+                                navigationPlugin.getClosestPoint(startingPoint)
+                            );
                         }
-                        break;
-                }
-            });
-
-            scene.onBeforeRenderObservable.add(() => {
-                const agentCount = agents.length;
-                for (let i = 0; i < agentCount; i++) {
-                    const ag = agents[i];
-                    ag.mesh.position = crowd.getAgentPosition(ag.idx);
-                    const vel = crowd.getAgentVelocity(ag.idx);
-                    crowd.getAgentNextTargetPathToRef(ag.idx, ag.target.position);
-                    if (vel.length() > 0.2) {
-                        vel.normalize();
-                        const desiredRotation = Math.atan2(vel.x, vel.z);
-                        ag.mesh.rotation.y = ag.mesh.rotation.y + (desiredRotation - ag.mesh.rotation.y) * 0.05;
+                        const pathPoints = navigationPlugin.computePath(
+                            crowd.getAgentPosition(agents[0]),
+                            navigationPlugin.getClosestPoint(startingPoint)
+                        );
+                        pathLine = MeshBuilder.CreateDashedLines(
+                            "ribbon",
+                            {
+                                points: pathPoints,
+                                updatable: true,
+                                instance: pathLine,
+                            },
+                            scene
+                        );
                     }
-                }
-            });
-        }); // worker
+                };
+
+                scene.onPointerObservable.add((pointerInfo) => {
+                    switch (pointerInfo.type) {
+                        case PointerEventTypes.POINTERDOWN:
+                            if (pointerInfo?.pickInfo?.pickedMesh) {
+                                console.log(
+                                    "pointer down",
+                                    pointerInfo.pickInfo.pickedMesh.name
+                                );
+                                pointerDown(pointerInfo.pickInfo.pickedMesh);
+                            }
+                            break;
+                    }
+                });
+
+                scene.onBeforeRenderObservable.add(() => {
+                    const agentCount = agents.length;
+                    for (let i = 0; i < agentCount; i++) {
+                        const ag = agents[i];
+                        ag.mesh.position = crowd.getAgentPosition(ag.idx);
+                        const vel = crowd.getAgentVelocity(ag.idx);
+                        crowd.getAgentNextTargetPathToRef(
+                            ag.idx,
+                            ag.target.position
+                        );
+                        if (vel.length() > 0.2) {
+                            vel.normalize();
+                            const desiredRotation = Math.atan2(vel.x, vel.z);
+                            ag.mesh.rotation.y =
+                                ag.mesh.rotation.y +
+                                (desiredRotation - ag.mesh.rotation.y) * 0.05;
+                        }
+                    }
+                });
+            }
+        ); // worker
         return scene;
     };
 }
 
 function createStaticMesh(scene: Scene): Mesh {
-    const ground = MeshBuilder.CreateGround("ground1", {
-        width: 6,
-        height: 6,
-        subdivisions: 2
-    }, scene);
+    const ground = MeshBuilder.CreateGround(
+        "ground1",
+        {
+            width: 6,
+            height: 6,
+            subdivisions: 2,
+        },
+        scene
+    );
 
     // Materials
-    const mat1 = new StandardMaterial('mat1', scene);
+    const mat1 = new StandardMaterial("mat1", scene);
     mat1.diffuseColor = new Color3(1, 1, 1);
 
-    const sphere = MeshBuilder.CreateSphere("sphere1", { diameter: 2, segments: 16 }, scene);
+    const sphere = MeshBuilder.CreateSphere(
+        "sphere1",
+        { diameter: 2, segments: 16 },
+        scene
+    );
     sphere.material = mat1;
     sphere.position.y = 1;
 

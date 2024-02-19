@@ -11,7 +11,6 @@ import { CreateSceneClass } from "../createScene";
 // import "@babylonjs/core/Materials/standardMaterial";
 import { Texture } from "@babylonjs/core/Materials/Textures/texture";
 
-import grassTextureUrl from "../../assets/grass.jpg";
 import { DirectionalLight } from "@babylonjs/core/Lights/directionalLight";
 import { ShadowGenerator } from "@babylonjs/core/Lights/Shadows/shadowGenerator";
 
@@ -67,15 +66,14 @@ export class DefaultSceneWithTexture implements CreateSceneClass {
         sphere.position.y = 1;
 
         // Our built-in 'ground' shape.
-        const ground = CreateGround(
-            "ground",
-            { width: 6, height: 6 },
-            scene
-        );
+        const ground = CreateGround("ground", { width: 6, height: 6 }, scene);
 
         // Load a texture to be used as the ground material
         const groundMaterial = new StandardMaterial("ground material", scene);
-        groundMaterial.diffuseTexture = new Texture(grassTextureUrl, scene);
+        groundMaterial.diffuseTexture = new Texture(
+            "./assets/grass.jpg",
+            scene
+        );
 
         ground.material = groundMaterial;
         ground.receiveShadows = true;
@@ -88,7 +86,7 @@ export class DefaultSceneWithTexture implements CreateSceneClass {
         light.intensity = 0.5;
         light.position.y = 10;
 
-        const shadowGenerator = new ShadowGenerator(512, light)
+        const shadowGenerator = new ShadowGenerator(512, light);
         shadowGenerator.useBlurExponentialShadowMap = true;
         shadowGenerator.blurScale = 2;
         shadowGenerator.setDarkness(0.2);
