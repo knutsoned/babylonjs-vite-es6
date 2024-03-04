@@ -27,8 +27,11 @@ export default defineConfig({
         {
             name: "fix-recast",
             transform(code, id) {
-                if (id.includes("recast-detour.js")) {
-                    return code.replace(`this["Recast"]`, 'window["Recast"]');
+                if (id.includes("recast-detour")) {
+                    return code.replace(
+                        `this["Recast"]`,
+                        'window.this ||= window; window["Recast"]'
+                    );
                 }
             },
         },

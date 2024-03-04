@@ -12,7 +12,7 @@ import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 
-import Recast from "recast-detour";
+import Recast from "recast-detour/recast.js";
 import { PointerEventTypes } from "@babylonjs/core/Events/pointerEvents";
 import { LinesMesh } from "@babylonjs/core/Meshes/linesMesh";
 import { AbstractMesh } from "@babylonjs/core/Meshes/abstractMesh";
@@ -35,8 +35,7 @@ export class NavigationMeshRecast implements CreateSceneClass {
         // This creates a basic Babylon Scene object (non-mesh)
         const scene = new Scene(engine);
         const navigationPlugin = new RecastJSPlugin(recast);
-        // Ed. note: this should be able to be ./navmeshWorker.js or /navmeshWorker.js
-        navigationPlugin.setWorkerURL("/public/navMeshWorker.js");
+        navigationPlugin.setWorkerURL("/navmeshWorker.js");
 
         // This creates and positions a free camera (non-mesh)
         const camera = new FreeCamera("camera1", new Vector3(-6, 4, -8), scene);
