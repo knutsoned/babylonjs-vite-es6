@@ -55,5 +55,8 @@
         "url": "https://github.com/knutsoned/babylonjs-vite-es6/issues"
     },
     "homepage": "https://github.com/knutsoned/babylonjs-vite-es6",
-    "type": "module"
+    "type": "module",
+    "dependencies": {
+        "vite-plugin-static-copy": "^1.0.1"
+    }
 }

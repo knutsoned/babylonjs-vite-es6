@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 
 import glsl from "vite-plugin-glsl";
+import { viteStaticCopy } from "vite-plugin-static-copy";
 
 /** @type {import('vite').UserConfig} */
 export default defineConfig({
@@ -24,6 +25,14 @@ export default defineConfig({
     },
     plugins: [
         glsl(),
+        viteStaticCopy({
+            targets: [
+                {
+                    src: "node_modules/recast-detour/recast.*",
+                    dest: "",
+                },
+            ],
+        }),
         {
             name: "fix-recast",
             transform(code, id) {

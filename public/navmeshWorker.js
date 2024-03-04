@@ -1,4 +1,4 @@
-importScripts("https://preview.babylonjs.com/recast.js");
+importScripts("recast.wasm.js");
 
 onmessage = function(messageEvent) {
     // get message datas
